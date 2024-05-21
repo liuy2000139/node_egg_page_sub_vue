@@ -1,6 +1,6 @@
 <template>
   <main>
-    Hello Vue！
+    Hello Vue 3 ！
   </main>
 </template>
 
