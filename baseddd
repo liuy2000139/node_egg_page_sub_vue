@@ -1,0 +1,9 @@
+FROM node:20-buster
+RUN mkdir -p /home/build
+WORKDIR /home/build
+
+# 复制Dockerfile文件相同路径下的所有文件到容器内部的/home/build
+COPY ./ /home/build
+
+RUN npm i -g pnpm
+RUN pnpm i
