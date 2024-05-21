@@ -9,7 +9,7 @@ import qiankun from 'vite-plugin-qiankun'
 // https://vitejs.dev/config/
 export default defineConfig(() => {
   return {
-    base: "https://vue.0218.life",
+    base: ".",
     plugins: [
       vue(),
       vueJsx(),
