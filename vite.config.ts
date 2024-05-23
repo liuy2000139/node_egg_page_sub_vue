@@ -2,20 +2,29 @@ import { fileURLToPath, URL } from 'node:url'
 
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
-import vueJsx from '@vitejs/plugin-vue-jsx'
-
+import AutoImport from 'unplugin-auto-import/vite'
+import Components from 'unplugin-vue-components/vite'
+import { ElementPlusResolver } from 'unplugin-vue-components/resolvers'
 import qiankun from 'vite-plugin-qiankun'
-
+import UnoCSS from 'unocss/vite'
+import vueJsx from "@vitejs/plugin-vue-jsx";
 // https://vitejs.dev/config/
 export default defineConfig(() => {
   return {
-    base: ".",
+    base: "./",
     plugins: [
       vue(),
-      vueJsx(),
       qiankun('vue', {
         useDevMode: true
-      })
+      }),
+      AutoImport({
+        resolvers: [ElementPlusResolver()],
+      }),
+      Components({
+        resolvers: [ElementPlusResolver()],
+      }),
+      UnoCSS(),
+      vueJsx(),
     ],
     resolve: {
       alias: {
@@ -25,7 +34,14 @@ export default defineConfig(() => {
     server: {
       port: 8002,
       cors: true,
-      origin: 'http://localhost:8002'
+      origin: 'http://localhost:8002',
+      proxy: {
+        '/api': {
+          target: 'http://localhost:7001',
+          changeOrigin: true,
+          // rewrite: (path: string) => path.replace(/^\/api/, '')
+        }
+      }
     }
   }
 })
