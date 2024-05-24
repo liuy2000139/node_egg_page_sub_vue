@@ -1,6 +1,7 @@
 <script setup>
-import { ref, watch } from 'vue'
+import { ref, watch, defineEmits } from 'vue'
 import * as api from '@/api/content'
+import { regions } from '@/views/Content/utils.js'
 
 const props = defineProps({
   id: {
@@ -18,14 +19,21 @@ const form = ref({
   desc: ''
 })
 const loading = ref(false)
+const emits = defineEmits(['getList'])
 watch(() => props.id, () => {
-  getDetail()
+  onReset()
 })
 const getDetail = async () => {
   if (!props.id) return
   loading.value = true
   try {
-    console.log(props.id)
+    const res = await api.getDetailApi(props.id)
+    console.log(res)
+    form.value = {
+      ...res.data,
+      type: res.data.type?.split(',') || [],
+      delivery: !!res.data.delivery
+    }
   } finally {
     loading.value = false
   }
@@ -34,12 +42,13 @@ const onSubmit = async () => {
   loading.value = true
   try {
     if (props.id) {
-await api.updateApi(props.id, form.value)
+      await api.updateApi(props.id, form.value)
     } else {
-await api.createApi(form.value)
+      await api.createApi(form.value)
     }
   } finally {
     loading.value = false
+    emits('getList')
   }
 }
 const onReset = () => {
@@ -59,14 +68,13 @@ const onReset = () => {
 </script>
 
 <template>
-  <el-form :model="form" label-width="auto"  v-loading="loading">
+  <el-form :model="form" label-width="auto" v-loading="loading">
     <el-form-item label="Activity name">
       <el-input v-model="form.name" placeholder="Please input your name" />
     </el-form-item>
     <el-form-item label="Activity zone">
       <el-select v-model="form.region" placeholder="please select your zone">
-        <el-option label="Zone one" value="shanghai" />
-        <el-option label="Zone two" value="beijing" />
+        <el-option v-for="item in regions" :key="item.value"  :value="item.value" :label="item.label"/>
       </el-select>
     </el-form-item>
     <el-form-item label="Instant delivery">
@@ -98,7 +106,7 @@ const onReset = () => {
       <el-input v-model="form.desc" type="textarea" />
     </el-form-item>
     <el-form-item>
-      <el-button type="primary" @click="onSubmit">Create</el-button>
+      <el-button type="primary" @click="onSubmit">{{id?'Update':'Create'}}</el-button>
       <el-button @click="onReset">Reset</el-button>
     </el-form-item>
   </el-form>

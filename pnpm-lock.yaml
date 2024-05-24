@@ -11,6 +11,9 @@ importers:
       '@unocss/reset':
         specifier: ^0.60.3
         version: 0.60.3
+      dayjs:
+        specifier: ^1.11.11
+        version: 1.11.11
       element-plus:
         specifier: ^2.7.3
         version: 2.7.3(vue@3.4.27(typescript@4.8.4))

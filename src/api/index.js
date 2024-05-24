@@ -24,16 +24,26 @@ const request = (method, url, data, config = {}) => {
       ...config
     }
     if (['GET', 'HEAD'].includes(method)) {
-      console.log(data)
-      url = url + '?' + transformParams(data)
+      if (data) {
+        url = url + '?' + transformParams(data)
+      }
     }  else {
       fetchConfig['body'] = stringify(data)
     }
-    fetch(url, )
-      .then(response => response.json())
+    fetch(url, fetchConfig)
+      .then(response => {
+        if (response.status !== 200) {
+          throw response
+        }
+        return response.json()
+      })
       .then(data => resolve(data))
       .catch(error => {
-        ElMessage.error(error?.message || '网络异常')
+        ElMessage.error(error?.statusText || error?.message || '网络异常')
+        if (error.status === 401) {
+          window.location.href = '/login'
+          return
+        }
         return reject(error)
       })
   })

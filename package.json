@@ -16,6 +16,7 @@
   },
   "dependencies": {
     "@unocss/reset": "^0.60.3",
+    "dayjs": "^1.11.11",
     "element-plus": "^2.7.3",
     "pinia": "^2.0.32",
     "unocss": "^0.60.3",

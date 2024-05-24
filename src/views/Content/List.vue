@@ -2,6 +2,8 @@
 import { reactive, ref, onMounted } from 'vue'
 import { ElMessageBox } from 'element-plus'
 import * as api from '@/api/content'
+import { formatDate } from '../../utils/index.js'
+import { regions } from './utils.js'
 
 defineProps({
   id: {
@@ -10,33 +12,7 @@ defineProps({
   }
 })
 const emits = defineEmits(['update:id'])
-const tableData = [
-  {
-    id: 1,
-    date: '2016-05-03',
-    name: 'Tom',
-    address: 'No. 189, Grove St, Los Angeles'
-  },
-  {
-    id: 2,
-    date: '2016-05-02',
-    name: 'Tom',
-    address: 'No. 189, Grove St, Los Angeles'
-  },
-  {
-    id: 3,
-    date: '2016-05-04',
-    name: 'Tom',
-    address: 'No. 189, Grove St, Los Angeles'
-  },
-  {
-    id: 4,
-    date: '2016-05-01',
-    name: 'Tom',
-    address: 'No. 189, Grove St, Los Angeles'
-  }
-]
-const formRef = ref(null)
+const tableData = ref([])
 const page = ref(1)
 const total = ref(0)
 const loading = ref(false)
@@ -60,20 +36,20 @@ const getList = async () => {
       pageSize: 10
     }
     const res = await api.getListApi(params)
-    console.log(res)
+    total.value = res?.data?.count || 0
+    tableData.value = res?.data?.rows || []
   } finally {
     loading.value = false
   }
 }
 
 const onSubmit = () => {
-  if (!formRef.value) return
   page.value = 1
   getList()
 }
 const onReset = () => {
-  if (!formRef.value) return
-  formRef.value.resetFields()
+  form.name = ''
+  form.region = ''
   page.value = 1
   getList()
 }
@@ -105,6 +81,7 @@ const deleteItem = (id) => {
           type: 'success',
           message: 'Delete completed'
         })
+        getList()
       } finally {
         loading.value = false
       }
@@ -118,11 +95,15 @@ const deleteItem = (id) => {
     })
 }
 
+defineExpose({
+  getList
+})
+
 </script>
 
 <template>
   <div v-loading="loading">
-    <el-form :model="form" label-width="50px" ref="formRef" :inline="true">
+    <el-form :model="form" label-width="50px" :inline="true">
       <el-form-item label="Name">
         <el-input v-model="form.name" placeholder="Please input your name" />
       </el-form-item>
@@ -139,9 +120,35 @@ const deleteItem = (id) => {
 
     </el-form>
     <el-table :data="tableData" style="width: 100%">
-      <el-table-column prop="date" label="Date" />
-      <el-table-column prop="name" label="Name" />
-      <el-table-column prop="address" label="Address" />
+      <el-table-column prop="id" label="ID" width="80"/>
+      <el-table-column prop="name" label="Activity name" />
+      <el-table-column prop="region" label="Activity zone" >
+        <template #default="scope">
+          <span>{{regions.find(v => v.value === scope.row.region)?.label || scope.row.region}}</span>
+        </template>
+      </el-table-column>
+      <el-table-column prop="delivery" label="Instant delivery" >
+        <template #default="scope">
+          <span>{{ scope.row.delivery ? 'Yes' : 'No'}}</span>
+        </template>
+      </el-table-column>
+      <el-table-column prop="type" label="Activity type" >
+        <template #default="scope">
+          <ElSpace v-if="scope.row.type"><el-tag v-for="v in scope.row.type.split(',')" :key="v">{{ v }}</el-tag></ElSpace>
+        </template>
+      </el-table-column>
+
+      <el-table-column prop="resource" label="Resources" />
+      <el-table-column prop="type" label="Update Date" >
+        <template #default="scope">
+          <span>{{formatDate(scope.row.updateAt)}}</span>
+        </template>
+      </el-table-column>
+      <el-table-column prop="type" label="Create Date" >
+        <template #default="scope">
+          <span>{{formatDate(scope.row.createAt)}}</span>
+        </template>
+      </el-table-column>
       <el-table-column label="Operations" width="180">
         <template #default="scope">
           <el-button type="primary" link @click="editItem(scope.row.id)">Edit</el-button>
