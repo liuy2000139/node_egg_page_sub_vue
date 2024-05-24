@@ -1,6 +1,7 @@
 FROM vue-page
 COPY ./ /home/build
 WORKDIR /home/build
+Run pnpm install
 RUN pnpm run build
 
 
